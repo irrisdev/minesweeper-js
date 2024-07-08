@@ -1,0 +1,42 @@
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+
+.minesweeper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+tr {
+  margin: 0;
+  padding: 0;
+}
+
+td {
+  background-color: #c0c0c0;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid #444444;
+}
+
+td:hover {
+  background-color: #d3d3d3;
+}
+
+td.revealed {
+  background-color: #d3d3d3;
+}
