@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const width = 10;
-  const height = 10;
+  const height = 15;
   const mines = 10;
   const minesweeper = document.getElementById("game");
 
@@ -74,30 +74,58 @@ const generateBoard = (x, y, mines) => {
 const plotBoard = (m, b) => {
   b.forEach((row, y) => {
     tablerow = document.createElement("tr");
-    tablerow.classList.add(y);
+    tablerow.id = y;
     row.forEach((cell, x) => {
       cellElement = createCell(b, x, y);
-      cellElement.classList.add(x);
+      cellElement.id = (y*b[0].length + x);
+      //cellElement.innerHTML = b[y][x].mine ? "💣" : (b[y][x].adjacent == 0 ? " " : b[y][x].adjacent);
       tablerow.append(cellElement);
     });
     m.append(tablerow);
   });
 };
 
-const revealCell = (b, c, x, y) => {
+const revealCell = (b, x, y) => {
 
-  c.innerHTML = b[y][x].mine ? "💣" : b[y][x].adjacent;
+  x = Math.floor(x);
+  y = Math.floor(y);
+
+  if (x < 0 || x > b[0].length-1 || y < 0 || y > b.length-1 || b[y][x].mine || b[y][x].revealed) { return; }
+
+  let c = document.getElementById(y*b[0].length + x);
+
+  if (!b[y][x].adjacent == 0) {
+    
+    c.innerHTML = b[y][x].mine ? "💣" : (b[y][x].adjacent == 0 ? " " : b[y][x].adjacent);
+    c.classList.add("revealed");
+    b[y][x].revealed = true;
+
+    return;
+  }
+
+  c.innerHTML = b[y][x].mine ? "💣" : (b[y][x].adjacent == 0 ? " " : b[y][x].adjacent);
+  c.classList.add("revealed");
+  b[y][x].revealed = true;
+
+  offsets.forEach((offset) => {
+
+    revealCell(b, x + offset[0], y + offset[1]);
+
+  });
+
+
+
 
 }
 
 const createCell = (b) => {
   let ty, tx, cell = document.createElement("td");
   cell.addEventListener("click", (e) => {
-    ty = e.target.parentNode.className
-    tx = e.target.className
-
-    revealCell(b, cell, tx, ty);
-
+    ty = e.target.parentNode.id;
+    tx = e.target.id % b[0].length;
+    if (!b[ty][tx].revealed){
+      revealCell(b, tx, ty);
+    }
 
   });
   return cell;
