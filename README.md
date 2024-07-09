@@ -1,6 +1,6 @@
 # Minesweeper
 
-A classic Minesweeper game implemented in JavaScript.
+A classic Minesweeper game implemented in JavaScript [here](https://irrisdev.github.io/minesweeper-js/).
 
 ## Features
 
