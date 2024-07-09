@@ -21,7 +21,8 @@ const offsets = [
 ];
 
 let initial = true;
-let debug = false;
+const debug = false;
+const bombSvg = `💣`
 
 const modifyNeighbors = (b, x, y, value) => {
   
@@ -104,15 +105,20 @@ const revealCell = (b, x, y) => {
   x = Math.floor(x);
   y = Math.floor(y);
 
-  if (x < 0 || x > b[0].length - 1 || y < 0 || y > b.length - 1 || b[y][x].mine || b[y][x].revealed) {
+  if (x < 0 || x > b[0].length - 1 || y < 0 || y > b.length - 1 || b[y][x].revealed) {
     return;
   }
 
   let c = document.getElementById(y * b[0].length + x);
 
-  c.innerHTML = b[y][x].mine ? "💣" : b[y][x].adjacent == 0 ? " " : b[y][x].adjacent;
+  c.innerHTML = b[y][x].mine ? bombSvg : b[y][x].adjacent == 0 ? " " : b[y][x].adjacent;
   c.classList.add("revealed");
+
   b[y][x].revealed = true;
+
+  if (b[y][x].mine){
+    return;
+  }
 
   if (!b[y][x].adjacent == 0) {
     c.classList.add(`number-${b[y][x].adjacent}`);
