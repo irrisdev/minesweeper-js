@@ -21,22 +21,20 @@ const offsets = [
 ];
 
 let initial = true;
+let debug = false;
 
 const modifyNeighbors = (b, x, y, value) => {
-  let ox, oy;
+  
   offsets.forEach((offset) => {
-    ox = x + offset[0];
-    oy = y + offset[1];
+    let ox = x + offset[0];
+    let oy = y + offset[1];
 
-    if (ox < 0 || ox > b[0].length - 1 || oy < 0 || oy > b.length - 1 || b[oy][ox].mine) {
+    if (ox < 0 || ox > b[0].length - 1 || oy < 0 || oy > b.length - 1) {
       return;
     }
 
     b[oy][ox].adjacent += value;
 
-    if (b[oy][ox].adjacent < 0) {
-      b[oy][ox].adjacent = 0;
-    }
   });
 };
 
@@ -53,9 +51,7 @@ const generateBoard = (x, y, mines) => {
   );
 
   while (placed < mines) {
-    let [rx, ry] = placeMine(board);
-
-    modifyNeighbors(board, rx, ry, 1);
+    placeMine(board);
 
     placed++;
   }
@@ -64,13 +60,11 @@ const generateBoard = (x, y, mines) => {
 };
 
 const placeMine = (b, exclude) => {
-  let rx,
-    ry,
-    x = b[0].length,
-    y = b.length;
+  let x = b[0].length;
+  let y = b.length;
 
-  rx = Math.floor(Math.random() * x);
-  ry = Math.floor(Math.random() * y);
+  let rx = Math.floor(Math.random() * x);
+  let ry = Math.floor(Math.random() * y);
 
   if (typeof exclude === "undefined") {
     exclude = new Set();
@@ -83,6 +77,8 @@ const placeMine = (b, exclude) => {
 
   b[ry][rx].mine = true;
 
+  modifyNeighbors(board, rx, ry, 1);
+
   return [rx, ry];
 };
 
@@ -93,7 +89,11 @@ const plotBoard = (m, b) => {
     row.forEach((cell, x) => {
       cellElement = createCell(b, x, y);
       cellElement.id = y * b[0].length + x;
-      //cellElement.innerHTML = b[y][x].mine ? "💣" : (b[y][x].adjacent == 0 ? " " : b[y][x].adjacent);
+
+      if (debug){
+        cellElement.innerHTML = b[y][x].mine ? `💣${b[y][x].adjacent}` : (b[y][x].adjacent == 0 ? " " : b[y][x].adjacent);
+      }
+
       tablerow.append(cellElement);
     });
     m.append(tablerow);
@@ -103,7 +103,6 @@ const plotBoard = (m, b) => {
 const revealCell = (b, x, y) => {
   x = Math.floor(x);
   y = Math.floor(y);
-  //console.log(x,y,y*b[0].length + x);
 
   if (x < 0 || x > b[0].length - 1 || y < 0 || y > b.length - 1 || b[y][x].mine || b[y][x].revealed) {
     return;
@@ -111,57 +110,93 @@ const revealCell = (b, x, y) => {
 
   let c = document.getElementById(y * b[0].length + x);
 
-  if (!b[y][x].adjacent == 0) {
-    c.innerHTML = b[y][x].mine ? "💣" : b[y][x].adjacent == 0 ? " " : b[y][x].adjacent;
-    c.classList.add("revealed");
-    c.classList.add(`number-${b[y][x].adjacent}`);
-    b[y][x].revealed = true;
-
-    return;
-  }
-
   c.innerHTML = b[y][x].mine ? "💣" : b[y][x].adjacent == 0 ? " " : b[y][x].adjacent;
   c.classList.add("revealed");
   b[y][x].revealed = true;
+
+  if (!b[y][x].adjacent == 0) {
+    c.classList.add(`number-${b[y][x].adjacent}`);
+    return;
+  }
 
   offsets.forEach((offset) => {
     revealCell(b, x + offset[0], y + offset[1]);
   });
 };
 
+const checkNeighbors = (b, x, y) => {
+
+  offsets.forEach((offset) => {
+    let ox = x+offset[0]
+    let oy = y+offset[1]
+
+    if (ox < 0 || ox > b[0].length - 1 || oy < 0 || oy > b.length - 1) {
+      return;
+    }
+
+    if (b[oy][ox].mine) {
+      console.log("Push Away Failed");
+    } else {
+      console.log("Push Away Sucess");
+
+    }
+
+  });
+
+};
+
 const createCell = (b) => {
-  let ty,
-    tx,
-    cell = document.createElement("td");
+
+  let cell = document.createElement("td");
+
   cell.addEventListener("click", (e) => {
-    ty = Math.floor(e.target.parentNode.className);
-    tx = Math.floor(e.target.id % b[0].length);
-    console.log(tx, ty);
+    let ty = Math.floor(e.target.parentNode.className);
+    let tx = Math.floor(e.target.id % b[0].length);
+    
     if (!b[ty][tx].revealed) {
+
       if (initial) {
+
         const excludePositions = new Set();
-        const loffsets = [...offsets];
-        loffsets.push([0, 0]);
-        loffsets.forEach((ele) => {
+        const localoffsets = [...offsets];
+        localoffsets.push([0, 0]);
+        localoffsets.forEach((ele) => {
           excludePositions.add(`${tx + ele[0]},${ty + ele[1]}`);
         });
 
-        loffsets.forEach((offset) => {
+        localoffsets.forEach((offset) => {
           let ox = tx + offset[0];
           let oy = ty + offset[1];
 
-          if (ox < 0 || oy < 0 || ox > b[0].length || oy > b.length || !b[oy][ox].mine) {
+          if (ox < 0 || ox > b[0].length - 1 || oy < 0 || oy > b.length - 1 || !b[oy][ox].mine) {
             return;
           }
 
           b[oy][ox].mine = false;
           modifyNeighbors(b, ox, oy, -1);
-          const [px, py] = placeMine(b, excludePositions);
-          modifyNeighbors(b, px, py, 1);
+          placeMine(b, excludePositions);
+
         });
 
-        loffsets.pop();
         initial = false;
+
+        if (debug){
+          checkNeighbors(b, tx, ty);
+
+          board.forEach(function (ele, e) {
+            ele.forEach(function (sq, i) {
+              if (ele[i].mine) {
+                // document.querySelector(
+                //   `tr[class='${e}'] td:nth-child(${i + 1})`
+                // ).style.backgroundColor = "red";
+                document.querySelector(
+                  `tr[class='${e}'] td:nth-child(${i + 1})`
+                ).innerHTML = b[e][i].mine ? `💣${b[e][i].adjacent}` : b[e][i].adjacent == 0 ? " " : b[e][i].adjacent;
+
+              }
+            });
+          });
+        }
       }
 
       revealCell(b, tx, ty);
