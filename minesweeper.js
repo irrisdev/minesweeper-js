@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const width = 10;
-  const height = 15;
+  const height = 14;
   const mines = 10;
   const minesweeper = document.getElementById("game");
 
@@ -74,7 +74,7 @@ const generateBoard = (x, y, mines) => {
 const plotBoard = (m, b) => {
   b.forEach((row, y) => {
     tablerow = document.createElement("tr");
-    tablerow.id = y;
+    tablerow.classList.add(y);
     row.forEach((cell, x) => {
       cellElement = createCell(b, x, y);
       cellElement.id = (y*b[0].length + x);
@@ -86,9 +86,9 @@ const plotBoard = (m, b) => {
 };
 
 const revealCell = (b, x, y) => {
-
   x = Math.floor(x);
   y = Math.floor(y);
+  //console.log(x,y,y*b[0].length + x);
 
   if (x < 0 || x > b[0].length-1 || y < 0 || y > b.length-1 || b[y][x].mine || b[y][x].revealed) { return; }
 
@@ -121,8 +121,9 @@ const revealCell = (b, x, y) => {
 const createCell = (b) => {
   let ty, tx, cell = document.createElement("td");
   cell.addEventListener("click", (e) => {
-    ty = e.target.parentNode.id;
+    ty = e.target.parentNode.className;
     tx = e.target.id % b[0].length;
+    console.log(tx,ty);
     if (!b[ty][tx].revealed){
       revealCell(b, tx, ty);
     }
