@@ -5,14 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minesweeper</title>
     <link rel="stylesheet" href="output.css" />
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="flex flex-col items-center h-screen bg-zinc-100">
+  <body class="bg-zinc-100">
     <header class="m-4 text-center">
       <h1 class="text-3xl font-bold">Minesweeper</h1>
     </header>
 
-    <div id="minesweeper" class="grid grid-rows-10 p-[1px] gap-[1px] bg-zinc-300 hidden text-center"></div>
+    <table id="minesweeper" class="hidden text-center mx-auto"></table>
+
+    <div class="action">
+      <button type="button" onclick="generate(30)">New</button>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option selected="selected" value="normal">Normal</option>
+        <option value="hard">Hard</option>
+        <option value="extreme">Extreme</option>
+      </select>
+      <button type="button" onclick="validate()">Reveal</button>
+      <div id="message-box" style="display: none"></div>
+    </div>
 
     <div class="hidden grid-cols-10 bg-zinc-200 w-10 h-10 hover:bg-zinc-200 justify-center font-medium text-xl"></div>
 

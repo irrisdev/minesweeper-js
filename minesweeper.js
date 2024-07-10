@@ -1,7 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const width = 10;
-  const height = 10;
-  const mines = 30;
   const minesweeper = document.getElementById("minesweeper");
 
   const board = generateBoard(width, height, mines);
@@ -9,6 +6,26 @@ document.addEventListener("DOMContentLoaded", () => {
   plotBoard(minesweeper, board);
 
   minesweeper.classList.remove("hidden");
+});
+
+const Modes = Object.freeze({
+  EASY: {
+    width: 10,
+    height: 8,
+    mines: 10,
+  },
+
+  NORMAL: {
+    width: 18,
+    height: 14,
+    mines: 40,
+  },
+
+  HARD: {
+    width: 24,
+    height: 20,
+    mines: 99,
+  },
 });
 
 const offsets = [
@@ -22,9 +39,15 @@ const offsets = [
   [1, 1],
 ];
 
-let initial = true;
+const width = 10;
+const height = 10;
+const mines = 30;
+
 const debug = false;
 const bombSvg = `💣`;
+
+let initial = true;
+let revealed = 0;
 
 const modifyNeighbors = (b, x, y, value) => {
   offsets.forEach((offset) => {
@@ -85,9 +108,8 @@ const placeMine = (b, exclude) => {
 
 const plotBoard = (m, b) => {
   b.forEach((row, y) => {
-    tablerow = document.createElement("div");
+    tablerow = document.createElement("tr");
     tablerow.classList.add(y);
-    tablerow.classList.add("grid", "grid-cols-10", "gap-[1px]");
 
     row.forEach((cell, x) => {
       cellElement = createCell(b, x, y);
@@ -100,6 +122,12 @@ const plotBoard = (m, b) => {
     });
     m.append(tablerow);
   });
+};
+
+const gameEnd = (win) => {
+  if (win) {
+  } else {
+  }
 };
 
 const revealCell = (b, x, y) => {
@@ -118,14 +146,19 @@ const revealCell = (b, x, y) => {
   b[y][x].revealed = true;
 
   if (b[y][x].mine) {
-    alert("Hit a mine!");
-    location.reload();
+    gameEnd(false);
     return;
   }
 
   if (!b[y][x].adjacent == 0) {
     c.classList.add(`number-${b[y][x].adjacent}`);
     return;
+  }
+
+  revealed++;
+
+  if (revealed == width * height) {
+    gameEnd(true);
   }
 
   offsets.forEach((offset) => {
@@ -151,9 +184,9 @@ const checkNeighbors = (b, x, y) => {
 };
 
 const createCell = (b) => {
-  let cell = document.createElement("div");
+  let cell = document.createElement("td");
 
-  cell.classList.add("w-10", "h-10", "bg-zinc-100", "hover:bg-zinc-200", "flex", "justify-center", "items-center", "font-medium", "text-xl");
+  cell.classList.add("bg-zinc-100", "hover:bg-zinc-200", "font-medium", "text-xl");
 
   cell.addEventListener("click", (e) => {
     let ty = Math.floor(e.target.parentNode.className[0]);
