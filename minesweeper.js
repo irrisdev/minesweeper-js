@@ -24,10 +24,9 @@ const offsets = [
 
 let initial = true;
 const debug = false;
-const bombSvg = `💣`
+const bombSvg = `💣`;
 
 const modifyNeighbors = (b, x, y, value) => {
-  
   offsets.forEach((offset) => {
     let ox = x + offset[0];
     let oy = y + offset[1];
@@ -37,7 +36,6 @@ const modifyNeighbors = (b, x, y, value) => {
     }
 
     b[oy][ox].adjacent += value;
-
   });
 };
 
@@ -89,13 +87,13 @@ const plotBoard = (m, b) => {
   b.forEach((row, y) => {
     tablerow = document.createElement("div");
     tablerow.classList.add(y);
-    tablerow.classList.add('grid', 'grid-cols-10', 'gap-[1px]');
+    tablerow.classList.add("grid", "grid-cols-10", "gap-[1px]");
 
     row.forEach((cell, x) => {
       cellElement = createCell(b, x, y);
       cellElement.id = y * b[0].length + x;
-      if (debug){
-        cellElement.innerHTML = b[y][x].mine ? `💣${b[y][x].adjacent}` : (b[y][x].adjacent == 0 ? " " : b[y][x].adjacent);
+      if (debug) {
+        cellElement.innerHTML = b[y][x].mine ? `💣${b[y][x].adjacent}` : b[y][x].adjacent == 0 ? " " : b[y][x].adjacent;
       }
 
       tablerow.append(cellElement);
@@ -119,7 +117,7 @@ const revealCell = (b, x, y) => {
 
   b[y][x].revealed = true;
 
-  if (b[y][x].mine){
+  if (b[y][x].mine) {
     alert("Hit a mine!");
     location.reload();
     return;
@@ -136,10 +134,9 @@ const revealCell = (b, x, y) => {
 };
 
 const checkNeighbors = (b, x, y) => {
-
   offsets.forEach((offset) => {
-    let ox = x+offset[0]
-    let oy = y+offset[1]
+    let ox = x + offset[0];
+    let oy = y + offset[1];
 
     if (ox < 0 || ox > b[0].length - 1 || oy < 0 || oy > b.length - 1) {
       return;
@@ -149,96 +146,84 @@ const checkNeighbors = (b, x, y) => {
       console.log("Push Away Failed");
     } else {
       console.log("Push Away Sucess");
-
     }
-
   });
-
 };
 
 const createCell = (b) => {
-
   let cell = document.createElement("div");
 
-  cell.classList.add('w-10', 'h-10', 'bg-zinc-100', 'hover:bg-zinc-200', 'flex', 'justify-center', 'items-center', 'font-medium', 'text-xl');
+  cell.classList.add("w-10", "h-10", "bg-zinc-100", "hover:bg-zinc-200", "flex", "justify-center", "items-center", "font-medium", "text-xl");
 
   cell.addEventListener("click", (e) => {
     let ty = Math.floor(e.target.parentNode.className[0]);
     let tx = Math.floor(e.target.id % b[0].length);
-    
-    if (e.target.nodeName.toLowerCase() === 'p'|| b[ty][tx].flagged || b[ty][tx].revealed) return
 
-      if (initial) {
+    if (e.target.nodeName.toLowerCase() === "p" || b[ty][tx].flagged || b[ty][tx].revealed) return;
 
-        const excludePositions = new Set();
-        const localoffsets = [...offsets];
-        localoffsets.push([0, 0]);
-        localoffsets.forEach((ele) => {
-          excludePositions.add(`${tx + ele[0]},${ty + ele[1]}`);
-        });
+    if (initial) {
+      const excludePositions = new Set();
+      const localoffsets = [...offsets];
+      localoffsets.push([0, 0]);
+      localoffsets.forEach((ele) => {
+        excludePositions.add(`${tx + ele[0]},${ty + ele[1]}`);
+      });
 
-        localoffsets.forEach((offset) => {
-          let ox = tx + offset[0];
-          let oy = ty + offset[1];
+      localoffsets.forEach((offset) => {
+        let ox = tx + offset[0];
+        let oy = ty + offset[1];
 
-          if (ox < 0 || ox > b[0].length - 1 || oy < 0 || oy > b.length - 1 || !b[oy][ox].mine) {
-            return;
-          }
-
-          b[oy][ox].mine = false;
-          modifyNeighbors(b, ox, oy, -1);
-          placeMine(b, excludePositions);
-
-        });
-
-        initial = false;
-
-        if (debug){
-          checkNeighbors(b, tx, ty);
-
-          board.forEach(function (ele, e) {
-            ele.forEach(function (sq, i) {
-              if (ele[i].mine) {
-                // document.querySelector(
-                //   `tr[class='${e}'] td:nth-child(${i + 1})`
-                // ).style.backgroundColor = "red";
-                document.querySelector(
-                  `div[class='${e}'] div:nth-child(${i + 1})`
-                ).innerHTML = b[e][i].mine ? `💣${b[e][i].adjacent}` : b[e][i].adjacent == 0 ? " " : b[e][i].adjacent;
-
-              }
-            });
-          });
+        if (ox < 0 || ox > b[0].length - 1 || oy < 0 || oy > b.length - 1 || !b[oy][ox].mine) {
+          return;
         }
+
+        b[oy][ox].mine = false;
+        modifyNeighbors(b, ox, oy, -1);
+        placeMine(b, excludePositions);
+      });
+
+      initial = false;
+
+      if (debug) {
+        checkNeighbors(b, tx, ty);
+
+        board.forEach(function (ele, e) {
+          ele.forEach(function (sq, i) {
+            if (ele[i].mine) {
+              // document.querySelector(
+              //   `tr[class='${e}'] td:nth-child(${i + 1})`
+              // ).style.backgroundColor = "red";
+              document.querySelector(`div[class='${e}'] div:nth-child(${i + 1})`).innerHTML = b[e][i].mine
+                ? `💣${b[e][i].adjacent}`
+                : b[e][i].adjacent == 0
+                ? " "
+                : b[e][i].adjacent;
+            }
+          });
+        });
       }
+    }
 
-      revealCell(b, tx, ty);
-    
+    revealCell(b, tx, ty);
   });
-
 
   cell.addEventListener("contextmenu", (event) => {
     event.preventDefault();
     let ty = Math.floor(event.target.parentNode.className[0]);
     let tx = Math.floor(event.target.id % b[0].length);
-    
-    if (event.target.nodeName.toLowerCase() === 'p' || b[ty][tx].revealed) return;
+
+    if (event.target.nodeName.toLowerCase() === "p" || b[ty][tx].revealed) return;
 
     let r = document.getElementById(ty * b[0].length + tx);
-  
-    if (b[ty][tx].flagged){
 
+    if (b[ty][tx].flagged) {
       b[ty][tx].flagged = false;
       r.innerHTML = "";
-
     } else {
-    
       b[ty][tx].flagged = true;
-      r.innerHTML = `🚩`
-
+      r.innerHTML = `🚩`;
     }
-
-  })
+  });
 
   return cell;
 };
