@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minesweeper</title>
     <link rel="stylesheet" href="output.css" />
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    
   </head>
-  <body>
-    <h1>Minesweeper</h1>
-    <div id="minesweeper">
-      <table id="game"></table>
-    </div>
-    <script src="minesweeper.js"></script>
+  <body class="flex flex-col items-center h-screen bg-zinc-100">
+
+      <header class="m-4 text-center">
+        <h1 class="text-3xl font-bold ">Minesweeper</h1>
+      </header>
+
+      <div id="minesweeper" class="grid grid-rows-10 p-[1px] gap-[1px] bg-zinc-300 hidden text-center"></div>
+
+   <script src="minesweeper.js"></script>
   </body>
 </html>

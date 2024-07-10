@@ -2,11 +2,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const width = 10;
   const height = 10;
   const mines = 30;
-  const minesweeper = document.getElementById("game");
+  const minesweeper = document.getElementById("minesweeper");
 
   const board = generateBoard(width, height, mines);
 
   plotBoard(minesweeper, board);
+
+  minesweeper.classList.remove("hidden");
 });
 
 const offsets = [
@@ -85,12 +87,13 @@ const placeMine = (b, exclude) => {
 
 const plotBoard = (m, b) => {
   b.forEach((row, y) => {
-    tablerow = document.createElement("tr");
+    tablerow = document.createElement("div");
     tablerow.classList.add(y);
+    tablerow.classList.add('grid', 'grid-cols-10', 'gap-[1px]');
+
     row.forEach((cell, x) => {
       cellElement = createCell(b, x, y);
       cellElement.id = y * b[0].length + x;
-
       if (debug){
         cellElement.innerHTML = b[y][x].mine ? `💣${b[y][x].adjacent}` : (b[y][x].adjacent == 0 ? " " : b[y][x].adjacent);
       }
@@ -111,12 +114,14 @@ const revealCell = (b, x, y) => {
 
   let c = document.getElementById(y * b[0].length + x);
 
-  c.innerHTML = b[y][x].mine ? bombSvg : b[y][x].adjacent == 0 ? " " : b[y][x].adjacent;
-  c.classList.add("revealed");
+  c.innerHTML = b[y][x].mine ? bombSvg : b[y][x].adjacent == 0 ? " " : `<p>${b[y][x].adjacent}</p>`;
+  c.classList.replace("bg-zinc-100", "bg-zinc-200");
 
   b[y][x].revealed = true;
 
   if (b[y][x].mine){
+    alert("Hit a mine!");
+    location.reload();
     return;
   }
 
@@ -153,13 +158,15 @@ const checkNeighbors = (b, x, y) => {
 
 const createCell = (b) => {
 
-  let cell = document.createElement("td");
+  let cell = document.createElement("div");
+
+  cell.classList.add('w-10', 'h-10', 'bg-zinc-100', 'hover:bg-zinc-200', 'flex', 'justify-center', 'items-center', 'font-medium', 'text-xl');
 
   cell.addEventListener("click", (e) => {
-    let ty = Math.floor(e.target.parentNode.className);
+    let ty = Math.floor(e.target.parentNode.className[0]);
     let tx = Math.floor(e.target.id % b[0].length);
     
-    if (!b[ty][tx].revealed) {
+    if (e.target.nodeName.toLowerCase() === 'p'|| b[ty][tx].flagged || b[ty][tx].revealed) return
 
       if (initial) {
 
@@ -196,7 +203,7 @@ const createCell = (b) => {
                 //   `tr[class='${e}'] td:nth-child(${i + 1})`
                 // ).style.backgroundColor = "red";
                 document.querySelector(
-                  `tr[class='${e}'] td:nth-child(${i + 1})`
+                  `div[class='${e}'] div:nth-child(${i + 1})`
                 ).innerHTML = b[e][i].mine ? `💣${b[e][i].adjacent}` : b[e][i].adjacent == 0 ? " " : b[e][i].adjacent;
 
               }
@@ -206,8 +213,33 @@ const createCell = (b) => {
       }
 
       revealCell(b, tx, ty);
-    }
+    
   });
+
+
+  cell.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    let ty = Math.floor(event.target.parentNode.className[0]);
+    let tx = Math.floor(event.target.id % b[0].length);
+    
+    if (event.target.nodeName.toLowerCase() === 'p' || b[ty][tx].revealed) return;
+
+    let r = document.getElementById(ty * b[0].length + tx);
+  
+    if (b[ty][tx].flagged){
+
+      b[ty][tx].flagged = false;
+      r.innerHTML = "";
+
+    } else {
+    
+      b[ty][tx].flagged = true;
+      r.innerHTML = `🚩`
+
+    }
+
+  })
+
   return cell;
 };
 
