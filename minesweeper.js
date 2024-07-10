@@ -1,12 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
   const minesweeper = document.getElementById("minesweeper");
 
-  const board = generateBoard(width, height, mines);
+  f = document.getElementById("flags");
+  game = Modes.NORMAL;
+  flagged = game.mines;
+
+  f.innerHTML = flagged;
+
+  const board = generateBoard(game.width, game.height, game.mines);
 
   plotBoard(minesweeper, board);
 
   minesweeper.classList.remove("hidden");
 });
+
+
+const updateFlags = (n) => {
+
+  f.innerHTML = n;
+
+}
 
 const Modes = Object.freeze({
   EASY: {
@@ -39,15 +52,14 @@ const offsets = [
   [1, 1],
 ];
 
-const width = 10;
-const height = 10;
-const mines = 30;
 
 const debug = false;
-const bombSvg = `💣`;
 
+let game;
 let initial = true;
 let revealed = 0;
+let flagged;
+let f;
 
 const modifyNeighbors = (b, x, y, value) => {
   offsets.forEach((offset) => {
@@ -140,7 +152,7 @@ const revealCell = (b, x, y) => {
 
   let c = document.getElementById(y * b[0].length + x);
 
-  c.innerHTML = b[y][x].mine ? bombSvg : b[y][x].adjacent == 0 ? " " : `<p>${b[y][x].adjacent}</p>`;
+  c.innerHTML = b[y][x].mine ? '💣' : b[y][x].adjacent == 0 ? " " : `<p>${b[y][x].adjacent}</p>`;
   c.classList.replace("bg-zinc-100", "bg-zinc-200");
 
   b[y][x].revealed = true;
@@ -157,7 +169,7 @@ const revealCell = (b, x, y) => {
 
   revealed++;
 
-  if (revealed == width * height) {
+  if (revealed == game.width * game.height) {
     gameEnd(true);
   }
 
@@ -189,7 +201,7 @@ const createCell = (b) => {
   cell.classList.add("bg-zinc-100", "hover:bg-zinc-200", "font-medium", "text-xl");
 
   cell.addEventListener("click", (e) => {
-    let ty = Math.floor(e.target.parentNode.className[0]);
+    let ty = Math.floor(e.target.parentNode.classList[0]);
     let tx = Math.floor(e.target.id % b[0].length);
 
     if (e.target.nodeName.toLowerCase() === "p" || b[ty][tx].flagged || b[ty][tx].revealed) return;
@@ -242,7 +254,7 @@ const createCell = (b) => {
 
   cell.addEventListener("contextmenu", (event) => {
     event.preventDefault();
-    let ty = Math.floor(event.target.parentNode.className[0]);
+    let ty = Math.floor(event.target.parentNode.classList[0]);
     let tx = Math.floor(event.target.id % b[0].length);
 
     if (event.target.nodeName.toLowerCase() === "p" || b[ty][tx].revealed) return;
@@ -251,10 +263,15 @@ const createCell = (b) => {
 
     if (b[ty][tx].flagged) {
       b[ty][tx].flagged = false;
+      flagged++;
       r.innerHTML = "";
-    } else {
+      f.innerHTML = flagged;
+    } else if (flagged > 0) {
       b[ty][tx].flagged = true;
+      flagged--;
       r.innerHTML = `🚩`;
+      f.innerHTML = flagged;
+
     }
   });
 
